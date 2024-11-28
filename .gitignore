@@ -1,0 +1,5 @@
+data_extracted\
+data_products\
+decprecated\
+*.fits
+!example/
