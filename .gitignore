@@ -1,6 +1,6 @@
 data_extracted\
 data_products\
-deprecated/
+deprecated\
 *.fits
 *.png
 !example/
