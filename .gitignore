@@ -4,3 +4,4 @@ deprecated\
 *.fits
 *.png
 !example/
+*.txt
