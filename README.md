@@ -30,5 +30,7 @@ What can be done in the future:
 
 (+) Ha line maps rescaling to correct for NII line emission [paper](https://iopscience.iop.org/article/10.1088/0004-637X/792/1/75/pdf)
 
+chandry goodsn xray catalog 
+>selection.
 
 
