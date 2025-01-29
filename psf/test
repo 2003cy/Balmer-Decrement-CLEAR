@@ -11,14 +11,14 @@ No spectrum  # Spectrum file
 -1.000000  # Minor axis jitter in mas
 0.000000  # Angle of jitter major axis in deg from +X axis
 1  # Number of positions
-300 450  # Position 1
-2.975  # PSF diameter in arcsecs
+600 1000  # Position 1
+1.944  # PSF diameter in arcsecs
 1  # Skip wavelengths with low weights? (0=no)
 0.010000  # Min good weight limit coefficient
 1  # Number of wavelengths
-1.000000 1.000000 512 # Wavelength 1 (microns), weight, grid size
-90  # Integrated PSF dimension (pixels)
-0.033055  # Integrated PSF scaling (arcsec)
+1.400000 1.000000 512 # Wavelength 1 (microns), weight, grid size
+42  # Integrated PSF dimension (pixels)
+0.046277  # Integrated PSF scaling (arcsec)
 1.000000  # Subsampling factor (1 = normal)
 2  #  Use mirror maps? (0 = no, otherwise yes)
 1  #  Adjust for WFC3 field aberrations? (0=no)

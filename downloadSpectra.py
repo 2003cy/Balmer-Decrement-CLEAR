@@ -19,7 +19,7 @@ def download_spectrum(extract):
     # Files
     files =[]
     remote_urls = []
-    for type in ['full','stack']:
+    for type in ['full','stack','beams']:
         # Remote URL
         remote_urls.append(f"https://archive.stsci.edu/hlsps/clear/data/{type}/{field}/")
         files.append(f"hlsp_clear_hst_wfc3_{field}-{id}_g102-g141_v4_{type}.fits")

@@ -17,6 +17,13 @@ Most primitive function is realized, incl.
 3. pf calculation (ongoing)
 4. radial profile of surface brightness & balmer decrement
 
+### progress on psf check
+
+what to expect from psfs: the hbeta psf should be slightly smaller than halpha psf
+
+A sanity check: fit gaussian to each psfs and compare the FWHM; also can compute the growth curve
+
+
 
 What can be done in the future:
 
@@ -33,4 +40,9 @@ What can be done in the future:
 chandry goodsn xray catalog 
 >selection.
 
+
+
+sfr binning + sfr/m
+
+2d ha/hb
 

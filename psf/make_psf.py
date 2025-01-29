@@ -125,7 +125,7 @@ def make_subsampled_model_psf(filename,
                               tinytim_path=default_tinytim_path,
                               subsampling_factor=default_subsampling_factor,
                               linear_fit=False,
-                              clobber=True,
+                              exist_skip=True,
                               mono = default_mono,
                               **optical_params):
     if psf_position[0]>1023 or psf_position[1]>1023:
@@ -161,11 +161,10 @@ def make_subsampled_model_psf(filename,
     """
     os.environ["TINYTIM"] = tinytim_path
 
-    # If clobber is False, check if the desired file already exists
-    if not clobber:
-        if os.path.isfile(filename):
-            raise IOError("File " + filename + " already exists. Set clobber=True if you wish to overwrite it.")
 
+    if exist_skip:
+            if os.path.isfile(filename):
+                return f"{filename_base} skipped"
     # Create a directory to contain this project
     try:
         os.makedirs(os.path.split(filename)[0])
@@ -197,7 +196,7 @@ def make_subsampled_model_psf(filename,
                 str(detector) + "\n" + \
                 str(psf_position[0]) + " " + str(psf_position[1]) + "\n" + \
                 'MONO ' + "\n" + \
-                str(mono) + "\n" + \
+                str(1000) + "\n" + \
                 str(psf_size) + "\n" + \
                 str(focus) + "\n" + \
                 filename_base + "\nEOF"
@@ -287,6 +286,17 @@ def make_subsampled_model_psf(filename,
     replace_multiple_in_file(tmp_par_file, par_file, strs_to_replace, replacements)
     #------------------------------------------------
 
+    # this part is very important!!!
+    #very interesting that tinytim1 param file generation has a weird limitation in wavelength, thats narrower than WFC3 response curve
+    #so this part we manually change the wavelength in the par file
+    with open(par_file,'r') as file:
+        lines = file.readlines()
+    parts = lines[18].split()
+    parts[0] = str(round(mono/1000,6)) #change the wavlength (in microns)
+    lines[18] = ' '.join(parts) + '\n'
+    with open(par_file,'w') as output_file:
+        output_file.writelines(lines)
+    #------------------------------------------------
 
     # Set up the command to call tiny2
     cmd = f"{tinytim_path}/tiny2 " + par_file
