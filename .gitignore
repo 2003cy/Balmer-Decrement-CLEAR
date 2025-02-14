@@ -6,3 +6,4 @@ mastDownload/
 *.png
 *.txt
 psf/__pycache__
+scripts/__pycache__/
