@@ -7,3 +7,4 @@ mastDownload/
 *.txt
 psf/__pycache__
 scripts/__pycache__/
+galfit/
