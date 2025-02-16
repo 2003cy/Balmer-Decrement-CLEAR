@@ -46,3 +46,14 @@ sfr binning + sfr/m
 
 2d ha/hb
 
+
+
+things now needs to test out:
+
+z binning G102 G141
+smaller PSF maps for better results? also maybe groth curves from PSF?
+N II gradient correction?
+Ha Hb gradient map
+
+
+
