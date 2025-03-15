@@ -1,4 +1,4 @@
-# test.tt3 : optional parameter file for tiny3
+# psf/individual_psf/icxt40npq_ha.tt3 : optional parameter file for tiny3
 #
 # Note : you do not have to modify this file to produce an ACS or WFC3 PSF
 # unless you want to generate a simulated observation convolved
@@ -6,8 +6,8 @@
 ###################################################################
 INPUT_FILENAME=no_file 
 PIXEL_SCALE=0.033055
-X_CENTER=300 
-Y_CENTER=450 
+X_CENTER=37 
+Y_CENTER=55 
 OUTPUT_FILENAME=no_file 
 ###################################################################
 # Required entries :

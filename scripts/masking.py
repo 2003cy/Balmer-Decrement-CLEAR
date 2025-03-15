@@ -46,27 +46,51 @@ class StandaloneSegmentationEditor:
         plt.show(block=True)  # ✅ Open in a truly separate window
 
     def load_images(self):
-        """Load and display images with segmentation overlays using the same colormap but grayscale outside seg."""
+        """Load and display images with segmentation overlays using separate norms for inside and outside segmentation."""
         self.image_plots = []
         seg_mask = self.segmentation_map == self.obj_id
+
+        # ✅ Store norms separately for inside (seg) and outside (non-seg) for both linear and log scales
+        self.norms_linear_inside = []
+        self.norms_linear_outside = []
+        self.norms_log_inside = []
+        self.norms_log_outside = []
 
         for i in range(3):
             img = self.detection_hdus[i].data
 
-            # ✅ Normalize data to maintain same color scale
-            norm = mcolors.Normalize(vmin=np.nanmin(img), vmax=np.nanmax(img))
+            # ✅ Compute separate norms for inside and outside segmentation
+            seg_values = img[seg_mask]
+            non_seg_values = img[~seg_mask]
+
+            # ✅ Avoid empty slices causing errors
+            min_seg = np.nanmin(seg_values) if np.any(np.isfinite(seg_values)) else 1e-5
+            max_seg = np.nanmax(seg_values) if np.any(np.isfinite(seg_values)) else 1
+            min_non_seg = np.nanmin(non_seg_values) if np.any(np.isfinite(non_seg_values)) else 1e-5
+            max_non_seg = np.nanmax(non_seg_values) if np.any(np.isfinite(non_seg_values)) else 1
+
+            # ✅ Store separate linear & log norms for inside and outside
+            norm_linear_inside = mcolors.Normalize(vmin=min_seg, vmax=max_seg)
+            norm_linear_outside = mcolors.Normalize(vmin=min_non_seg, vmax=max_non_seg)
+            norm_log_inside = mcolors.LogNorm(vmin=max(min_seg, 1e-5), vmax=max_seg)
+            norm_log_outside = mcolors.LogNorm(vmin=max(min_non_seg, 1e-5), vmax=max_non_seg)
+
+            self.norms_linear_inside.append(norm_linear_inside)
+            self.norms_linear_outside.append(norm_linear_outside)
+            self.norms_log_inside.append(norm_log_inside)
+            self.norms_log_outside.append(norm_log_outside)
+
+            # ✅ Start with linear scale by default
+            norm_inside = norm_linear_inside
+            norm_outside = norm_linear_outside
 
             # ✅ Apply plasma_r colormap to both, but make outside grayscale
-            seg_only = np.where(seg_mask, img, np.nan)
-            non_seg_only = np.where(~seg_mask, img, np.nan)
-
-            # ✅ Convert grayscale using `to_rgba()` with plasma_r but desaturate outside
             cmap = plt.cm.plasma_r
-            rgba_img = cmap(norm(img))  # Convert to RGBA
-            rgba_img[~seg_mask, :3] = np.mean(rgba_img[~seg_mask, :3], axis=1, keepdims=True)  # Convert outside to grayscale
+            rgba_img = cmap(norm_outside(img))  # Convert entire image to RGBA using outside norm
+            rgba_img[seg_mask, :3] = cmap(norm_inside(img[seg_mask]))[:, :3]  # Convert inside separately
 
             non_seg_plot = self.axes[i].imshow(rgba_img, origin="lower")
-            seg_plot = self.axes[i].imshow(seg_only, cmap="plasma_r", origin="lower", norm=norm)
+            seg_plot = self.axes[i].imshow(np.where(seg_mask, img, np.nan), cmap="plasma_r", origin="lower", norm=norm_inside)
 
             self.axes[i].set_title(f"Detection Image {i+1}")
             self.image_plots.append((non_seg_plot, seg_plot))
@@ -75,31 +99,50 @@ class StandaloneSegmentationEditor:
         self.seg_im = self.axes[3].imshow(self.segmentation_map, cmap="jet", origin="lower")
 
         self.axes[3].set_title("Segmentation Map with Pixel Boundaries")
+
+        # ✅ Default to linear scale
+        self.current_norms_inside = self.norms_linear_inside
+        self.current_norms_outside = self.norms_linear_outside
+
         self.canvas.draw()
 
     def update_images(self):
-        """Update segmentation overlay with the same plasma_r colormap but grayscale outside segmentation."""
+        """Update segmentation overlay dynamically, with separate inside & outside norms and log/linear scaling."""
         seg_mask = self.segmentation_map == self.obj_id
-
-
-        # ✅ Clear previous contours before adding new ones
-        for ax in self.axes:
-            for coll in ax.collections:
-                coll.remove()
 
         for i in range(3):
             img = self.detection_hdus[i].data
-            norm = mcolors.Normalize(vmin=np.nanmin(img), vmax=np.nanmax(img))
 
-            # ✅ Convert plasma_r to grayscale for non-segmented areas
-            rgba_img = plt.cm.plasma_r(norm(img))
-            rgba_img[~seg_mask, :3] = np.mean(rgba_img[~seg_mask, :3], axis=1, keepdims=True)  # Convert outside to grayscale
+            # ✅ Compute new separate norms dynamically
+            seg_values = img[seg_mask]
+            non_seg_values = img[~seg_mask]
 
-            self.image_plots[i][0].set_data(rgba_img)  # ✅ Update grayscale non-seg region
-            self.image_plots[i][1].set_data(np.where(seg_mask, img, np.nan))  # ✅ Update segmented region
+            min_seg = np.nanmin(seg_values) if np.any(np.isfinite(seg_values)) else 1e-5
+            max_seg = np.nanmax(seg_values) if np.any(np.isfinite(seg_values)) else 1
+            min_non_seg = np.nanmin(non_seg_values) if np.any(np.isfinite(non_seg_values)) else 1e-5
+            max_non_seg = np.nanmax(non_seg_values) if np.any(np.isfinite(non_seg_values)) else 1
+
+            if self.use_log:
+                norm_inside = mcolors.LogNorm(vmin=max(min_seg, 1e-5), vmax=max_seg)
+                norm_outside = mcolors.LogNorm(vmin=max(min_non_seg, 1e-5), vmax=max_non_seg)
+            else:
+                norm_inside = mcolors.Normalize(vmin=min_seg, vmax=max_seg)
+                norm_outside = mcolors.Normalize(vmin=min_non_seg, vmax=max_non_seg)
+
+            self.current_norms_inside[i] = norm_inside
+            self.current_norms_outside[i] = norm_outside
+
+            # ✅ Apply colormap & ensure proper scaling
+            rgba_img = plt.cm.plasma_r(norm_outside(img))  # Apply outside norm
+            rgba_img[seg_mask, :3] = plt.cm.plasma_r(norm_inside(img[seg_mask]))[:, :3]  # Apply inside norm
+
+            self.image_plots[i][0].set_data(rgba_img)  # ✅ Update non-segmented (grayscale outside)
+            self.image_plots[i][1].set_data(np.where(seg_mask, norm_inside(img), np.nan))  # ✅ Apply norm to segmented area
+
         self.seg_im.set_data(self.segmentation_map)  # ✅ Update segmentation map
+        self.canvas.draw_idle()  # ✅ Efficient refresh
 
-        self.canvas.draw_idle()  # ✅ Efficient update
+
 
 
     def modify_segmentation(self, x1, x2, y1, y2, remove_only=False, add_only=False):
@@ -129,9 +172,26 @@ class StandaloneSegmentationEditor:
             self.modify_segmentation(x, x + 1, y, y + 1, add_only=True)
 
     def on_select(self, eclick, erelease):
-        """Handles rectangle selection."""
+        """Handles rectangle selection and ensures previous selections are removed."""
         if eclick.inaxes is None:
             return
+
+        x1, y1 = int(eclick.xdata), int(eclick.ydata)
+        x2, y2 = int(erelease.xdata), int(erelease.ydata)
+
+        if eclick.button == 1:  # Left button drag: Remove segmentation
+            self.modify_segmentation(x1, x2, y1, y2, remove_only=True)
+        elif eclick.button == 3:  # Right button drag: Add segmentation
+            self.modify_segmentation(x1, x2, y1, y2, add_only=True)
+
+        # ✅ Manually remove previous rectangle
+        for ax in self.axes:
+            for coll in ax.collections:  
+                if isinstance(coll, plt.PatchCollection):  # ✅ Check if it's a drawn patch
+                    coll.remove()  # ✅ Remove old rectangle
+
+        self.canvas.draw_idle()  # ✅ Redraw the canvas after removal
+
 
         x1, y1 = int(eclick.xdata), int(eclick.ydata)
         x2, y2 = int(erelease.xdata), int(erelease.ydata)
@@ -157,40 +217,55 @@ class StandaloneSegmentationEditor:
             self.result = fits.ImageHDU(data=self.segmentation_map, header=self.header)
 
     def init_widgets(self):
-        """Initialize interactive tools (cursor, rectangle selector, buttons)."""
+        """Optimized widgets with lower latency for real-time updates."""
         self.cursors = []
         self.rect_selectors = []
 
         for ax in self.axes:
-            # ✅ Apply crosshair cursor to all panels
-            cursor = Cursor(ax, useblit=True, color='red', linewidth=1)
+            cursor = Cursor(ax, useblit=False, color='red', linewidth=1)  # ✅ Disable blitting for faster updates
             self.cursors.append(cursor)
 
-            # ✅ Apply rectangle selection tool to all panels
             selector = RectangleSelector(
                 ax, self.on_select,
-                useblit=True, interactive=True,
+                useblit=False, interactive=True,  # ✅ No blitting improves responsiveness
                 props=dict(facecolor='red', edgecolor='black', alpha=0.3, fill=True)
             )
             selector.set_active(True)
             self.rect_selectors.append(selector)
 
-        # Buttons for reset & finish
-        reset_ax = self.fig.add_axes([0.75, 0.02, 0.1, 0.05])
-        finish_ax = self.fig.add_axes([0.85, 0.02, 0.1, 0.05])
+        # ✅ Store current normalization state
+        self.use_log = False
+
+        # Buttons for reset, finish, and toggle normalization
+        reset_ax = self.fig.add_axes([0.65, 0.02, 0.1, 0.05])
+        finish_ax = self.fig.add_axes([0.75, 0.02, 0.1, 0.05])
+        toggle_ax = self.fig.add_axes([0.85, 0.02, 0.1, 0.05])
 
         self.reset_button = Button(reset_ax, 'Reset')
         self.finish_button = Button(finish_ax, 'Finish')
+        self.toggle_button = Button(toggle_ax, 'Toggle Log/Linear')
 
         self.reset_button.on_clicked(self.reset_segmentation)
         self.finish_button.on_clicked(self.finish)
+        self.toggle_button.on_clicked(self.toggle_normalization)
 
-        self.canvas.mpl_connect("button_press_event", self.on_click)  # Mouse click event
-        self.fig.canvas.mpl_connect("close_event", self.close_event)  # ✅ Ensure result is stored if closed manually
+        self.canvas.mpl_connect("button_press_event", self.on_click)
+        self.fig.canvas.mpl_connect("close_event", self.close_event)  # ✅ Ensure result is stored
+
+
 
     def get_result(self):
         """Return final segmentation as ImageHDU."""
         return self.result
+
+    def toggle_normalization(self, event):
+        """Toggle between linear and logarithmic scaling dynamically for both inside & outside segmentation."""
+        self.use_log = not self.use_log  # ✅ Flip between log and linear
+        self.update_images()  # ✅ Refresh plots with new normalization
+
+
+
+
 
 
 def run_segmentation_editor(detection_hdus, seg_hdu, obj_id):

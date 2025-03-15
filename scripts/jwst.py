@@ -56,4 +56,12 @@ def jwst_result(mass_type):
         return highmass_r, highmass_balmer, np.abs(highmass_err)
     else:
         raise ValueError("Invalid mass type. Choose from 'low', 'middle', or 'high'.")
+    
 
+def integrated_jwst():
+    m = np.array([ 8.41101624,  9.41611003, 10.03068485])
+    balmer = np.array([2.76057784, 3.12781194, 3.34633152])
+    balmer_err =np.array([3.3888942 , 3.43757367,
+        3.93923561])
+    balmer_err -= balmer
+    return m, balmer, balmer_err

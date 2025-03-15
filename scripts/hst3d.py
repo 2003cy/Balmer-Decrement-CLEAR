@@ -65,6 +65,26 @@ def hst3d_result(mass_type):
     else:
         raise ValueError("Invalid mass type. Choose from 'low', 'middle', or 'high'.")
 
+# this is the integrated balmer decrement as function of mass from
+#A J Battisti, M B Bagley, I Baronchelli, Y S Dai, A L Henry, M A Malkan, A Alavi, D Calzetti, J Colbert, P J McCarthy, V Mehta, M Rafelski, C Scarlata, I Shivaei, E Wisnioski, The average dust attenuation curve at z ∼ 1.3 based on HST grism surveys, Monthly Notices of the Royal Astronomical Society, Volume 513, Issue 3, July 2022, Pages 4431–4450, https://doi.org/10.1093/mnras/stac1052
+def integrated_hst3d():
+    m = np.array([ 8.41,  8.81,  9.06,  9.27,  9.43,  9.64,  9.88, 10.15, 10.69])
+    balmer = np.array([2.93, 4.18, 3.69, 3.6 , 4.38, 4.44, 4.72, 4.74, 4.1 ])
+    balmer_err = np.array([0.26, 0.31, 0.32, 0.31, 0.28, 0.31, 0.43, 0.37, 1.29])
+
+    m = np.array([ 9.58009709, 10.03640777, 10.60436893])
+    balmer =  np.array([ 0.6047619 ,  1.20952381,  2.34761905])
+    balmer_err = np.array([0.61428571,  1.2,2.35714286])
+    balmer_err = np.array([1.0952381 ,  1.86190476,  1.3952381 ])
 
 
-#jwst
+    mask = m>9.0
+    return m[mask], balmer[mask], np.abs(balmer_err-balmer)[mask]
+
+
+def integrated_hst3d_var():
+    m = np.array([ 9.25157412,  9.72443936, 10.00539173, 10.43086408])  
+
+    balmer = np.array([ 0.39589151,  0.49876488,  0.7082964 ,  1.1757607])   
+    balmer_err = np.array([0.2986401 ,0.33833216,  0.50895897,  1.0396253 ])
+    return m, balmer, np.abs(balmer_err-balmer)

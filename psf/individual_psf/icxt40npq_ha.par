@@ -1,5 +1,5 @@
 &BeginPar7.5
-test  # Output PSF file rootname
+psf/individual_psf/icxt40npq_ha  # Output PSF file rootname
 /home/yang/Desktop/tinytim/wfc3_ir.tab  # Name of Zernike table file
 /home/yang/Desktop/tinytim/wfc3_ir.pup  # Name of pupil table file
 00-00-0000 # Observation date (dd-mm-yyyy)
@@ -11,14 +11,14 @@ No spectrum  # Spectrum file
 -1.000000  # Minor axis jitter in mas
 0.000000  # Angle of jitter major axis in deg from +X axis
 1  # Number of positions
-600 1000  # Position 1
-1.944  # PSF diameter in arcsecs
+37 55  # Position 1
+3.967  # PSF diameter in arcsecs
 1  # Skip wavelengths with low weights? (0=no)
 0.010000  # Min good weight limit coefficient
 1  # Number of wavelengths
-1.400000 1.000000 512 # Wavelength 1 (microns), weight, grid size
-42  # Integrated PSF dimension (pixels)
-0.046277  # Integrated PSF scaling (arcsec)
+1.470094 1.000000 512 # Wavelength 1 (microns), weight, grid size
+120  # Integrated PSF dimension (pixels)
+0.033055  # Integrated PSF scaling (arcsec)
 1.000000  # Subsampling factor (1 = normal)
 2  #  Use mirror maps? (0 = no, otherwise yes)
 1  #  Adjust for WFC3 field aberrations? (0=no)
@@ -230,8 +230,8 @@ No spectrum  # Spectrum file
   547.     # Reference wavelength (nm)
   22       # Last Zernike in file
   0.       # Z1 = (Not used)
-  0.       # Z2 = X (V2) tilt
-  0.       # Z3 = Y (V3) tilt
+  -0.0042       # Z2 = X (V2) tilt
+  0.0046       # Z3 = Y (V3) tilt
 0.000000 # Z4 = Focus
   1e-12    # Z5 = 0 degree astigmatism
   1e-12    # Z6 = 45 degree astigmatism
@@ -240,14 +240,14 @@ No spectrum  # Spectrum file
   0.       # Z9 = X (V2) clover
   0.       # Z10 = Y (V3) clover
   0.       # Z11 = 3rd order spherical
-  0.       # Z12 = 0 degree Spherical astigmatism
-  0.       # Z13 = 45 degree Spherical astigmatism
+  0.0037       # Z12 = 0 degree Spherical astigmatism
+  0.0001       # Z13 = 45 degree Spherical astigmatism
   0.       # Z14 = X (V2) Ashtray
   0.       # Z15 = Y (V3) Ashtray
-  0.       # Z16
-  0.       # Z17
-  0.       # Z18
-  0.       # Z19
-  0.       # Z20
-  0.       # Z21
+  -0.0061       # Z16
+  0.0059       # Z17
+  0.0039       # Z18
+  0.002       # Z19
+  -0.0008       # Z20
+  0.0072       # Z21
   0.       # Z22 = 5th order spherical
