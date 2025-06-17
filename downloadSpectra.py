@@ -7,6 +7,7 @@ import subprocess
 import numpy as np
 from astropy.table import Table
 from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
 
 
 # Download product with rsync
@@ -19,7 +20,7 @@ def download_spectrum(extract):
     # Files
     files =[]
     remote_urls = []
-    for type in ['full','stack','beams']:
+    for type in ['full','beams']:
         # Remote URL
         remote_urls.append(f"https://archive.stsci.edu/hlsps/clear/data/{type}/{field}/")
         files.append(f"hlsp_clear_hst_wfc3_{field}-{id}_g102-g141_v4_{type}.fits")
@@ -67,17 +68,18 @@ def main():
     os.makedirs(os.path.join(home,'data_products'), exist_ok=True)
 
 
-    # Multi-threaded download
+# Multi-threaded download
     if ncpu > 1:
         with ThreadPoolExecutor(ncpu) as executor:
-            executor.map(
-                lambda e: download_spectrum(e),
-                extracted,
-            )
+            list(tqdm(
+                executor.map(download_spectrum, extracted),
+                total=len(extracted),
+                desc="Downloading spectra"
+            ))
 
     # Single-threaded download
     else:
-        for extract in extracted:
+        for extract in tqdm(extracted, desc="Downloading spectra"):
             download_spectrum(extract)
 
 

@@ -39,7 +39,7 @@ default_spec_file_path = '' # Use spectrum for a K-type star by default must be 
 default_filter_name = 'F105W'
 default_detector = 23  # WFC3/IR
 default_psf_size = 3.0
-default_tinytim_path = "/home/yang/Desktop/tinytim"  # Adjust as needed for your own purposes
+default_tinytim_path = "/Users/yangcheng/tinytim"  # Adjust as needed for your own purposes
 default_subsampling_factor = 8
 default_mono = False
 
@@ -163,8 +163,8 @@ def make_subsampled_model_psf(filename,
 
 
     if exist_skip:
-            if os.path.isfile(filename):
-                return f"{filename_base} skipped"
+            if os.path.exists(filename):
+                return f"{filename} skipped"
     # Create a directory to contain this project
     try:
         os.makedirs(os.path.split(filename)[0])
