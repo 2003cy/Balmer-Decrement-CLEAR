@@ -8,4 +8,4 @@ mastDownload/
 psf/__pycache__
 scripts/__pycache__/
 galfit/
-*._
+._*
