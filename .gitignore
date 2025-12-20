@@ -1,0 +1,7 @@
+.snakemake
+test_snakemake/
+.ipynb_checkpoints
+**/__pycache__/
+*.pyc
+output/
+**.fits
