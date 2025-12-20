@@ -1,0 +1,45 @@
+env: "stenv"
+output_dir: "output"
+home_dir: "/u/yacheng/projects/clear_bd/"
+
+num_threads: 5
+
+paths:
+    master_catalog_raw: "catalogs/master_cat_raw.fits"
+    master_catalog_clean: "catalogs/master_cat.fits"
+    plt_dir: "plots"
+    data_products_dir: "data_products"
+    psf_dir: "data_psf"
+    line_extraction_dir: "data_extracted"
+
+gen_master_catalog:
+    reload: False
+    test_length: 20 #num of object for test run, set to -1 for full run
+
+download_data:
+    data_products:
+     - "full"
+     - "beams"
+
+psf_ha:
+    wavelength: 656.461  # in nm
+    save_individual_psf: False
+    exist_skip: True
+
+psf_hb:
+    wavelength: 486.133  # in nm
+    save_individual_psf: False
+    exist_skip: True
+
+psf_match:
+    window: "CosineBellWindow"
+    alpha: 3.0
+    beta: 0.9
+
+
+line_extraction:
+    window_size: 50  # in pixels
+    exist_skip: False
+
+
+radial_profiles:
