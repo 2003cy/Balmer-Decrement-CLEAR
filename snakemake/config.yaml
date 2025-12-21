@@ -38,7 +38,7 @@ psf_match:
 
 
 line_extraction:
-    window_size: 50  # in pixels
+    window_size: 100  # in pixels
     exist_skip: False
 
 
