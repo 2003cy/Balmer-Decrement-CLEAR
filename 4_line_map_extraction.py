@@ -38,49 +38,53 @@ def extract_HaHb(full_fits_path, kernel_fits_path, line_fits_path, table_row_pat
             for i in [4,5]: 
                 hdu[i].data = hdu[i].data[si:ei,si:ei]
                 extracted_file.append(hdu[i])
-
+            kernel_hdul = fits.open(kernel_fits_path)
+            kernel_data = kernel_hdul[1].data
             #loop to select ha hb line maps
             for image in hdu:
                 if image.header.get('EXTTYPE') in ['Ha','Hb'] and (image.name == 'LINE' or image.name == 'LINEWHT'):
-
+                    print(f'found {image.header.get("EXTTYPE")}, {image.name}. Extracting...')
                     image.data = image.data[si:ei,si:ei]
                     image.name = f"{image.name}_{image.header['EXTTYPE']}"
+                    print('updated filename:',image.name)
                     #NII correction for Ha line map only
-                    if image.header.get('EXTTYPE') == 'Ha':
-                        if image.name == 'LINE':
-                            table_row = Table.read(table_row_path, format='ascii')[0]
-                            stellar_mass = table_row['mass']
-                            redshift     = table_row['z_MAP']
-                            nii_ha_ratio = nii_ha_ratio_zahid(stellar_mass, redshift)
-                            image.data = image.data / (1 + nii_ha_ratio)
-                            image.header['NII_CORR'] = (str(round(nii_ha_ratio,8)), '[NII]/Ha ratio applied for correction')
-                            image.name = 'LINE_HA'
+                    if image.name == 'LINE_HA':
+                        print(f"Applying [NII]/HA ratio for NII correction for linemap.")
+                        table_row = Table.read(table_row_path)[0]
+                        stellar_mass = table_row['mass']
+                        redshift     = table_row['z_MAP']
+                        nii_ha_ratio = nii_ha_ratio_zahid(stellar_mass, redshift)
+                        image.data = image.data / (1 + nii_ha_ratio)
+                        image.header['NII_CORR'] = (str(round(nii_ha_ratio,8)), '[NII]/Ha ratio applied for correction')
                             
-                        elif image.name == 'LINEWHT':
-                            image.header['NII_CORR'] = ('applied to LINE_HA', '[NII]/Ha ratio correction applied to LINE_HA')
-                            image.data = image.data / (1 + nii_ha_ratio)**2  #propagate weight correction
-                            image.name = 'LINEWHT_HA'
+                    elif image.name == 'LINEWHT_HA':
+                        image.header['NII_CORR'] = ('applied to LINE_HA', '[NII]/Ha ratio correction applied to LINE_HA')
+                        image.data = image.data / (1 + nii_ha_ratio)**2  #propagate weight correction
                             
-                    if image.header.get('EXTTYPE') == 'Hb':
-                        with fits.open(kernel_fits_path) as kernel_hdu:
-                            kernel_data = kernel_hdu[1].data
-                            if image.name == 'LINE':
-                                image.data = convolve_fft(image.data, kernel_data, 
+
+                    if image.name == 'LINE_HB':
+                        print(f"Applying PSF matching convolution to Hb linemap.")
+                        image.data = convolve_fft(image.data, kernel_data, 
+                                                normalize_kernel=True, 
+                                                boundary='wrap',
+                                                nan_treatment='interpolate')
+                        image.header['PSF_MATCH'] = ('applied', 'PSF matching convolution applied to Hb line map')
+                                
+                    elif image.name == 'LINEWHT_HB':
+                        print(f"Applying error propagation of convolution to Hb line weight map.")
+                        image.data = 1.0 / convolve_fft(1.0 / image.data, kernel_data**2, 
                                                         normalize_kernel=True, 
                                                         boundary='wrap',
                                                         nan_treatment='interpolate')
-                                image.header['PSF_MATCH'] = ('applied', 'PSF matching convolution applied to Hb line map')
-                                image.name = 'LINE_HB'
-                            elif image.name == 'LINEWHT':
-                                #erorr propagation for convolution on weigth map
-                                image.data = 1.0 / convolve_fft(1.0 / image.data, kernel_data**2, 
-                                                                normalize_kernel=True, 
-                                                                boundary='wrap',
-                                                                nan_treatment='interpolate')
-                                image.header['PSF_MATCH'] = ('applied', 'PSF matching convolution applied to Hb line map')
-                                image.name = 'LINEWHT_HB'
+                        image.header['PSF_MATCH'] = ('applied', 'PSF matching convolution applied to Hb line map')
+                    print(f"Adding {image.name} to extracted file.")
                     extracted_file.append(image)
+            
+            #finally append the kernel userd for PSF matching
+            kernel_hdul[1].name = 'PSF_MATCH_KERNEL'
+            extracted_file.append(kernel_hdul[1])
             extracted_file.writeto(line_fits_path,overwrite=True)
+            kernel_hdul.close()
             print(f"Extracted lines saved to {line_fits_path}")
             return None
         

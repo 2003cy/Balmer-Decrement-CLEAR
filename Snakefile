@@ -9,6 +9,7 @@ run_dir = os.path.join(home_dir, output_dir)
 path_lis = config["paths"]
 data_products_dir = os.path.join(run_dir, path_lis["data_products_dir"])
 data_extracted_dir = os.path.join(run_dir, path_lis["line_extraction_dir"])
+radial_profiles_dir = os.path.join(run_dir, path_lis["radial_profiles_dir"])
 psf_dir = os.path.join(run_dir, path_lis["psf_dir"])
 plt_dir  = os.path.join(run_dir, path_lis["plt_dir"])
 
@@ -45,6 +46,11 @@ def extracted_objs(wildcards=None):
     return expand(f"{data_extracted_dir}/{{field}}_{{id}}_extracted.fits",
         zip,field=wc.field, id=wc.id,)
 
+def radial_profiles(wildcards=None):
+    wc = list_downloaded_objs(wildcards)
+    return expand(f"{radial_profiles_dir}/{{field}}_{{id}}_profile.fits",
+        zip,field=wc.field, id=wc.id,)
+
 # top-level rule
 rule all:
     input:
@@ -54,7 +60,8 @@ rule all:
         psf_ha_objs,
         psf_hb_objs,
         psf_kernel_objs,
-        extracted_objs,    
+        extracted_objs,  
+        radial_profiles,  
 
 #generate master catalog
 cfg = config["gen_master_catalog"]
@@ -121,6 +128,7 @@ rule gen_psf_ha:
         f"{run_dir}/logs/gen_psf_ha/{{field}}_{{id}}.log",
     params:
         wavelength=cfg_psfha["wavelength"],
+        psf_shape=cfg_psfha.get("psf_shape", 31),
         save_individual=lambda wildcards: "--save_individual_psf" if cfg_psfha.get("save_individual_psf", False) else "",
         exist_skip= lambda wildcards: "--exist_skip" if cfg_psfha["exist_skip"] else "",
     shell:
@@ -131,6 +139,7 @@ rule gen_psf_ha:
             --row_fits_path {input.row_fits} \
             --save_fits_path {output.psf_ha_fits} \
             --wavelength {params.wavelength} \
+            --psf_shape {params.psf_shape} \
             {params.exist_skip} \
             {params.save_individual} \
             2>&1 | tee {log}
@@ -148,6 +157,7 @@ rule gen_psf_hb:
         f"{run_dir}/logs/gen_psf_hb/{{field}}_{{id}}.log",
     params:
         wavelength=cfg_psfhb["wavelength"],
+        psf_shape=cfg_psfhb.get("psf_shape", 31),
         save_individual=lambda wildcards: "--save_individual_psf" if cfg_psfhb.get("save_individual_psf", False) else "",
         exist_skip="--exist_skip" if cfg_psfhb["exist_skip"] else "",
     shell:
@@ -158,6 +168,7 @@ rule gen_psf_hb:
             --row_fits_path {input.row_fits} \
             --save_fits_path {output.psf_hb_fits} \
             --wavelength {params.wavelength} \
+            --psf_shape {params.psf_shape} \
             {params.exist_skip} \
             {params.save_individual} \
             2>&1 | tee {log}
@@ -220,23 +231,26 @@ rule extract_lines:
             --line_fits_path {output.extracted_fits} \
             2>&1 | tee {log} 
         """
-'''
+
+cfg_rp = config["radial_profiles"]
 rule radial_profiles:
     input:
         script="5_radial_profiles.py",
-        catalog=f"{run_dir}/{path_lis['master_catalog_clean']}",
-        extracted_objs=extracted_objs,
+        extracted_fits=f"{data_extracted_dir}/{{field}}_{{id}}_extracted.fits",
+        row_fits=f"{data_products_dir}/{{field}}_{{id}}_row.fits",
     output:
-        plt=f"{plt_dir}/radial_profiles_summary.png",
+        profile_fits = f"{radial_profiles_dir}/{{field}}_{{id}}_profile.fits",
+    params:
+        annuli_width = cfg_rp.get("annuli_width", 1),
     log:
-        f"{run_dir}/logs/radial_profiles.log",
+        f"{run_dir}/logs/radial_profiles/{{field}}_{{id}}.log",
     shell:
         """
-        mkdir -p $(dirname {log}) $(dirname {output.plt})
+        mkdir -p $(dirname {log})
         conda run -n {env_name} python {input.script} \
-            --catalog {input.catalog} \
-            --extracted_objs {" ".join(input.extracted_objs)} \
-            --output_plt {output.plt} \
+            --extracted_fits_path {input.extracted_fits} \
+            --row_fits_path {input.row_fits} \
+            --profile_fits_path {output.profile_fits} \
+            --annuli_width {params.annuli_width} \
             2>&1 | tee {log}
         """
-'''

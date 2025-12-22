@@ -39,6 +39,7 @@ def gen_drizzled_psf_for_wavelength(
     wavelength,
     save_fits_path,
     save_individual_psf=True,
+    psf_shape=31,
 ):
     """
     PSF generation & drizzle tool for an arbitrary emission line, for HST grism, Grilzli standart dataset.
@@ -116,7 +117,7 @@ def gen_drizzled_psf_for_wavelength(
 
                 make_subsampled_model_psf(
                     filename=tmp_psf,
-                    psf_size=6,  # arcsec
+                    psf_size=5,  # arcsec; 5arcssec in TINYTIM give 45x45 pixelsc-> later drizzle+crop to 31x31
                     filter_name=image.header["FILTER"],
                     focus=-0.14,
                     psf_position=coord,
@@ -129,6 +130,7 @@ def gen_drizzled_psf_for_wavelength(
                 # open tmp psf, update wcs info, and append to hdulist
                 with fits.open(tmp_psf) as hdu_psf:
                     img_hdu = fits.ImageHDU(data=hdu_psf[0].data, header=hdu_psf[0].header)
+                    print(f"  PSF shape: {img_hdu.data.shape}")
 
                     # PSF image FOV in arcsec = PIXSCALE * NAXIS1
                     size_arcsec = img_hdu.header["PIXSCALE"] * img_hdu.header["NAXIS1"]
@@ -171,8 +173,8 @@ def gen_drizzled_psf_for_wavelength(
     try:
         # ------------ drizzle all PSFs together ------------
         print("Starting to drizzle PSFs together...")
-        output_shape = (30, 30)  # same as your original choice
-
+        output_shape = (psf_shape, psf_shape)  # same as your original choice
+        print(f"Output drizzled PSF shape cropped to: {output_shape}")
         target_header, target_wcs = make_wcsheader(
             ra=table_row["ra"],
             dec=table_row["dec"],
@@ -233,6 +235,7 @@ def main():
     parser.add_argument("--beam_fits_path", type=str, required=True, help="Path to the beam FITS file.")
     parser.add_argument("--row_fits_path", type=str, required=True, help="Path to the ASCII table row file.")
     parser.add_argument("--wavelength", type=float, required=True, help="Rest-frame wavelength in nm.")
+    parser.add_argument("--psf_shape", type=int, default=31, help="Output drizzled PSF shape in pixels.")
     parser.add_argument("--save_fits_path", type=str, required=True, help="Path to save the drizzled PSF FITS file.")
     parser.add_argument("--save_individual_psf", action="store_true", help="Save individual PSFs as a multi-extension FITS.")
     parser.add_argument("--exist_skip", action="store_true", help="Skip generation if output file exists.")

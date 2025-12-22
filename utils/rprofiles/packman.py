@@ -21,7 +21,7 @@ def calculate_angle(A, B, C):
 
 
 def double_packman(size, angle_left, angle_right):
-    center = (size-1) / 2
+    center = size / 2 - 0.5
     
     mask = np.zeros((size, size))
     for i in range(size):
