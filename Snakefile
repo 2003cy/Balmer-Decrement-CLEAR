@@ -256,3 +256,7 @@ rule radial_profiles:
         """
 
 
+rule selection:
+    input:
+        #all radial profiles that's successfully generated 
+        all_radial_profiles=expand()
