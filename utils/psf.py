@@ -29,6 +29,7 @@ __all__ = ['make_subsampled_model_psf']
 
 import os
 import subprocess as sbp
+import time
 
 
 # Default values
@@ -296,8 +297,7 @@ def make_subsampled_model_psf(filename,
     lines[18] = ' '.join(parts) + '\n'
     with open(par_file,'w') as output_file:
         output_file.writelines(lines)
-    #------------------------------------------------
-
+    #------------------------------------------------     
     # Set up the command to call tiny2
     cmd = f"{tinytim_path}/tiny2 " + par_file
     # Run the command to call tiny2
@@ -305,8 +305,7 @@ def make_subsampled_model_psf(filename,
     sbp.run(cmd, shell=True,executable="/bin/bash",
             stdout=sbp.DEVNULL, stderr=sbp.DEVNULL)
             #timeout=10,check=True)
-    
-
+            
     # Set up the command to call tiny3
     cmd = f"{tinytim_path}/tiny3 " + par_file  + " SUB=" + str(int(subsampling_factor))
     # Run the command to call tiny3

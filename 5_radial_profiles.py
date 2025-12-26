@@ -63,7 +63,9 @@ def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
 #radial table for a given object
 def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_path=None,  annuli_widths=1):
     
-    obj = Table.read(row_fits_path)[0]
+    table = Table.read(row_fits_path)
+    obj = table[0]
+    
     with fits.open(extracted_fits_path,mode='update') as hdul:
         
         image_ha = hdul[4]
@@ -91,24 +93,23 @@ def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_
         #attenutation
         A_ha = E_bv / (Calzetti('Hb')-Calzetti('Ha')) * Calzetti('Ha')
 
-        #columns for the radial table
-        cols = [
-            fits.Column(name='DISTANCE [arcsec]',                     format='E', array=r),
-            fits.Column(name='Ha_SURF_BRIGHT [1e-17 erg/s/cm2]',      format='E', array=ha),
-            fits.Column(name='Ha_SURF_BRIGHT_err [1e-17 erg/s/cm2]',  format='E', array=ha_err),
-            fits.Column(name='Ha_SURF_BRIGHT_LIMIT [1e-17 erg/s/cm2]',format='E', array=ha_limit),
-            fits.Column(name='Hb_SURF_BRIGHT [1e-17 erg/s/cm2]',      format='E', array=hb),
-            fits.Column(name='Hb_SURF_BRIGHT_err [1e-17 erg/s/cm2]',  format='E', array=hb_err),
-            fits.Column(name='Hb_SURF_BRIGHT_LIMIT [1e-17 erg/s/cm2]',format='E', array=hb_limit),
-            fits.Column(name='BALMER_DECREM',                         format='E', array=balmer_r),
-            fits.Column(name='BALMER_DECREM_ERR',                     format='E',array=balmer_r_err),
-            fits.Column(name='E_BV',                                  format='E', array=E_bv),
-            fits.Column(name='A_Ha',                                  format='E', array=A_ha)
-        ]
-        new_table = fits.BinTableHDU.from_columns(cols)
-        new_table.writeto(profile_fits_path, overwrite=True)
-        return f"{obj['subfield']}-{obj['ID']} processed"
-    
+
+        table['distance'] = [r]
+        table['ha'] = [ha]
+        table['ha_err'] = [ha_err]
+        table['ha_limit'] = [ha_limit]
+        table['hb'] = [hb]
+        table['hb_err'] = [hb_err]
+        table['hb_limit'] = [hb_limit]
+        table['balmer_r'] = [balmer_r]
+        table['balmer_r_err'] = [balmer_r_err]
+        table['E_bv'] = [E_bv]
+        table['A_ha'] = [A_ha]
+        
+        table.write(profile_fits_path, overwrite=True)
+        
+        print(f"Saved radial profile to {profile_fits_path}")
+        
 def main():
     parser = argparse.ArgumentParser(description="Extract Ha and Hb radial profiles from extracted.fits")
     parser.add_argument('--extracted_fits_path', type=str, required=True, help='Path to the extracted data product FITS file')
@@ -130,6 +131,8 @@ def main():
                 )
         except Exception as e:
             print(f"Error during gen radial profiles for file {args.extracted_fits_path}: {e}")
-            return
+            with open(args.profile_fits_path, 'w') as f:
+                f.write(f"Error in generating radial profile: {e}\n")
+                
 if __name__ == '__main__':
     main()

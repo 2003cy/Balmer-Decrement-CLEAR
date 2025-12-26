@@ -94,7 +94,7 @@ def gen_drizzled_psf_for_wavelength(
                 if image.name != "SCI":
                     continue
                 
-                rootname = image.header["ROOTNAME"] #unique root extension, pointed to _rates raw observations
+                rootname = f"{image.header['ROOTNAME']}_{int(wavelength * (1.0 + redshift))}" #unique root extension, pointed to _rates raw observations
                 identifier = f"{table_row['subfield']}_{table_row['ID']}_{rootname}"
                 
                 # check if this exposure/filter covers the line
@@ -227,7 +227,6 @@ def gen_drizzled_psf_for_wavelength(
     except Exception as e:
         print(f"Error during drizzling process for file {save_fits_path}: {e}")
         return
-    
 
 def main():
     # parse arguments
@@ -251,7 +250,6 @@ def main():
             save_fits_path=args.save_fits_path,
             save_individual_psf=args.save_individual_psf,
         )
-    return
 
 if __name__ == "__main__":
     main()

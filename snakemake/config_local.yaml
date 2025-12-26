@@ -2,13 +2,14 @@
 #snakemake --configfile snakemake/config_local.yaml --cores 10
 env: "stenv"
 output_dir: "output"
-home_dir: "/Users/yangcheng/clear_bd/"
+home_dir: "/Users/yangcheng/clear_bd/Balmer-Decrement-CLEAR"
 
 num_threads: 10
 
 paths:
     master_catalog_raw: "catalogs/master_cat_raw.fits"
     master_catalog_clean: "catalogs/master_cat.fits"
+    master_catalog_auto_sel: "catalogs/master_cat_auto_sel.fits"
     plt_dir: "plots"
     data_products_dir: "data_products"
     psf_dir: "data_psf"

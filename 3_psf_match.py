@@ -70,6 +70,9 @@ def main():
         
     except Exception as e:
         print(f"Error in generating PSF matching kernel for {args.psf_ha_path} and {args.psf_hb_path}: {e}")
+        #generate a placeholder emptyfile, with error message
+        with open(args.save_kernel_path, 'w') as f:
+            f.write(f"Error in generating PSF matching kernel: {e}\n")
 
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ env_name = config["env"]
 home_dir = config["home_dir"]
 output_dir = config["output_dir"]
 import os
+import glob
 run_dir = os.path.join(home_dir, output_dir)
 
 path_lis = config["paths"]
@@ -19,7 +20,6 @@ from snakemake.io import glob_wildcards, expand
 def _ensure_download_checkpoint(wildcards=None):
     # Force Snakemake to wait for the download checkpoint before globbing results.
     return checkpoints.download_data.get(**wildcards) if wildcards else checkpoints.download_data.get()
-
 def list_downloaded_objs(wildcards=None):
     _ensure_download_checkpoint(wildcards)
     pattern = f"{data_products_dir}/{{field}}_{{id}}_full.fits"
@@ -61,8 +61,8 @@ rule all:
         psf_hb_objs,
         psf_kernel_objs,
         extracted_objs,  
-        radial_profiles,  
-
+        radial_profiles,
+        
 #generate master catalog
 cfg = config["gen_master_catalog"]
 rule master_catalog:
@@ -233,7 +233,7 @@ rule extract_lines:
         """
 
 cfg_rp = config["radial_profiles"]
-rule radial_profiles:
+rule gen_radial_profiles:
     input:
         script="5_radial_profiles.py",
         extracted_fits=f"{data_extracted_dir}/{{field}}_{{id}}_extracted.fits",
@@ -255,8 +255,21 @@ rule radial_profiles:
             2>&1 | tee {log}
         """
 
-
-rule selection:
+rule auto_selection:
+    threads: 1
     input:
-        #all radial profiles that's successfully generated 
-        all_radial_profiles=expand()
+        script="6_auto_selection.py",
+        profiles=radial_profiles,
+    output:
+        selected_catalog=f"{run_dir}/{path_lis['master_catalog_auto_sel']}",
+    log:
+        f"{run_dir}/logs/auto_selection.log",
+    shell: 
+        """
+        mkdir -p $(dirname {log})
+        conda run -n {env_name} python {input.script} \
+            --all_radial_profiles {input.profiles} \
+            --selected_catalog {output.selected_catalog} \
+            2>&1 | tee {log}
+        """
+

@@ -90,7 +90,6 @@ def extract_HaHb(full_fits_path, kernel_fits_path, line_fits_path, table_row_pat
         
     except Exception as e:
         print(f"! Error processing {full_fits_path}: {e}")
-        return None
 
 def main():
     parser = argparse.ArgumentParser(description="Extract Ha and Hb line maps from full data products.")
