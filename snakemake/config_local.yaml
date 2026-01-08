@@ -18,11 +18,11 @@ paths:
 
 gen_master_catalog:
     reload: False
-    test_length: 20 #num of object for test run, set to -1 for full run
+    test_length: 40 #num of object for test run, set to -1 for full run
 
 download_data:
     data_products:
-     - "full"
+     - "full" 
      - "beams"
 
 psf_ha:
@@ -50,3 +50,6 @@ line_extraction:
 
 radial_profiles:
     annuli_width: 1
+    selection:
+        radius_limit: 2
+        num_points: 2

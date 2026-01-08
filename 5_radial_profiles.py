@@ -93,7 +93,14 @@ def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_
         #attenutation
         A_ha = E_bv / (Calzetti('Hb')-Calzetti('Ha')) * Calzetti('Ha')
 
-
+        #first manual selection based on sn_limit
+        mask_r = (r < 1*obj['re']/0.1*obj['pixel_length'])
+        mask_sb_limit = (ha > ha_limit) & (hb > hb_limit)
+        if len(r[mask_r & mask_sb_limit]) > 0:
+                has_profile = 1
+        else:
+                has_profile = 0
+        
         table['distance'] = [r]
         table['ha'] = [ha]
         table['ha_err'] = [ha_err]
@@ -105,6 +112,7 @@ def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_
         table['balmer_r_err'] = [balmer_r_err]
         table['E_bv'] = [E_bv]
         table['A_ha'] = [A_ha]
+        table['has_profile'] = [has_profile]
         
         table.write(profile_fits_path, overwrite=True)
         
