@@ -5,3 +5,5 @@ test_snakemake/
 *.pyc
 output/
 **.fits
+.DS_Store
+.vscode/
