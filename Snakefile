@@ -1,4 +1,8 @@
 #configfile: "snakemake/config_local.yaml"
+'''
+snakemake -s ./Snakefile_preprocess --cores 7 --configfile snakemake/config.yaml --keep-going
+'''
+
 num_threads = config["num_threads"]
 env_name = config["env"]
 home_dir = config["home_dir"]
@@ -54,9 +58,9 @@ def radial_profiles(wildcards=None):
 # top-level rule
 rule all:
     input:
-        #f"{run_dir}/{path_lis['master_catalog_raw']}",
-        #f"{run_dir}/{path_lis['master_catalog_clean']}",
-        #f"{data_products_dir}/.download_completed",
+        f"{run_dir}/{path_lis['master_catalog_raw']}",
+        f"{run_dir}/{path_lis['master_catalog_clean']}",
+        f"{data_products_dir}/.download_completed",
         psf_ha_objs,
         psf_hb_objs,
         psf_kernel_objs,
