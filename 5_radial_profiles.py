@@ -130,17 +130,17 @@ def main():
         print(f"File {args.profile_fits_path} already exists. Skipping extraction.")
         return 
     else:
-        try:
-            compute_bd_profile(
-                row_fits_path=args.row_fits_path,
-                extracted_fits_path=args.extracted_fits_path,
-                profile_fits_path=args.profile_fits_path,
-                annuli_widths=args.annuli_width
-                )
-        except Exception as e:
-            print(f"Error during gen radial profiles for file {args.extracted_fits_path}: {e}")
-            with open(args.profile_fits_path, 'w') as f:
-                f.write(f"Error in generating radial profile: {e}\n")
+        #try:
+        compute_bd_profile(
+            row_fits_path=args.row_fits_path,
+            extracted_fits_path=args.extracted_fits_path,
+            profile_fits_path=args.profile_fits_path,
+            annuli_widths=args.annuli_width
+            )
+        #except Exception as e:
+        #    print(f"Error during gen radial profiles for file {args.extracted_fits_path}: {e}")
+        #    with open(args.profile_fits_path, 'w') as f:
+        #        f.write(f"Error in generating radial profile: {e}\n")
                 
 if __name__ == '__main__':
     main()
