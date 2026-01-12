@@ -7,7 +7,8 @@ output_dir: "output"
 env_flag: "-p /u/yacheng/conda-envs/stenv"
 home_dir: "/u/yacheng/projects/clear_bd"
 
-num_threads: 12
+#this is num_threads for 1 job force to be 1
+num_threads: 1
 
 paths:
     master_catalog_raw: "catalogs/master_cat_raw.fits"
@@ -21,7 +22,7 @@ paths:
 
 gen_master_catalog:
     reload: False
-    test_length: 20 #num of object for test run, set to -1 for full run
+    test_length: -1 #num of object for test run, set to -1 for full run
 
 download_data:
     data_products:
