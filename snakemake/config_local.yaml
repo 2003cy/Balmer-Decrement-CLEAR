@@ -4,7 +4,7 @@ env: "stenv"
 output_dir: "output"
 home_dir: "/Users/yangcheng/clear_bd/Balmer-Decrement-CLEAR"
 
-num_threads: 10
+num_threads: 13
 
 paths:
     master_catalog_raw: "catalogs/master_cat_raw.fits"
@@ -18,7 +18,7 @@ paths:
 
 gen_master_catalog:
     reload: False
-    test_length: 40 #num of object for test run, set to -1 for full run
+    test_length: 20 #num of object for test run, set to -1 for full run
 
 download_data:
     data_products:
