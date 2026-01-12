@@ -1,10 +1,13 @@
 # Configuration file for Snakemake workflow in local machine
 #snakemake --configfile snakemake/config_local.yaml --keep-going --cores 12
-env: "stenv"
 output_dir: "output"
-home_dir: "/Users/yangcheng/clear_bd/Balmer-Decrement-CLEAR"
 
-num_threads: 13
+#env_fag: "-n stenv"
+#home_dir: "/Users/yangcheng/clear_bd/Balmer-Decrement-CLEAR" 
+env_flag: "-p /u/yacheng/conda-envs/stenv"
+home_dir: "/u/yacheng/projects/clear_bd"
+
+num_threads: 12
 
 paths:
     master_catalog_raw: "catalogs/master_cat_raw.fits"

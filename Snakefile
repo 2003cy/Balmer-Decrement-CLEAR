@@ -1,5 +1,6 @@
+
 num_threads = config["num_threads"]
-env_name = config["env"]
+conda_env_flag = config["env_flag"]
 home_dir = config["home_dir"]
 output_dir = config["output_dir"]
 import os
@@ -80,12 +81,13 @@ rule master_catalog:
     log:
         f"{run_dir}/logs/master_catalog.log",
     params:
+        conda_env_flag=conda_env_flag,
         reload_flag=cfg["reload"],
         test_length=cfg["test_length"],
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --raw {output.raw} \
             --clean {output.clean} \
             --plt_dir {plt_dir} \
@@ -105,13 +107,14 @@ checkpoint download_data:
     log:
         f"{run_dir}/logs/download_data.log",
     params:
+        conda_env_flag=conda_env_flag,
         output_dir=lambda wildcards: f"{data_products_dir}",
         data_products=lambda wildcards: " ".join(cfg_dl.get("data_products", [])),
         extract_rows=lambda wildcards: cfg_dl.get("extract_individual_rows", False),
     shell:
         """
         mkdir -p $(dirname {log}) {params.output_dir}
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             {input.catalog_to_download} \
             --ncpu {threads} \
             --output-dir {params.output_dir} \
@@ -132,6 +135,7 @@ rule gen_psf_ha:
     log:
         f"{run_dir}/logs/gen_psf_ha/{{field}}_{{id}}.log",
     params:
+        conda_env_flag=conda_env_flag,
         wavelength=cfg_psfha["wavelength"],
         psf_shape=cfg_psfha.get("psf_shape", 31),
         save_individual=lambda wildcards: "--save_individual_psf" if cfg_psfha.get("save_individual_psf", False) else "",
@@ -139,7 +143,7 @@ rule gen_psf_ha:
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --beam_fits_path {input.beam_fits} \
             --row_fits_path {input.row_fits} \
             --save_fits_path {output.psf_ha_fits} \
@@ -161,6 +165,7 @@ rule gen_psf_hb:
     log:
         f"{run_dir}/logs/gen_psf_hb/{{field}}_{{id}}.log",
     params:
+        conda_env_flag=conda_env_flag,
         wavelength=cfg_psfhb["wavelength"],
         psf_shape=cfg_psfhb.get("psf_shape", 31),
         save_individual=lambda wildcards: "--save_individual_psf" if cfg_psfhb.get("save_individual_psf", False) else "",
@@ -168,7 +173,7 @@ rule gen_psf_hb:
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --beam_fits_path {input.beam_fits} \
             --row_fits_path {input.row_fits} \
             --save_fits_path {output.psf_hb_fits} \
@@ -191,13 +196,14 @@ rule psf_match:
     log:
         f"{run_dir}/logs/psf_match/{{field}}_{{id}}.log",
     params:
+        conda_env_flag=conda_env_flag,
         window=cfg_psfm.get("window", "None"),
         alpha=cfg_psfm.get("alpha", 3.0),
         beta=cfg_psfm.get("beta", 0.9),
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --psf_ha_path {input.psf_ha} \
             --psf_hb_path {input.psf_hb} \
             --save_kernel_path {output.kernel_fits} \
@@ -222,12 +228,13 @@ rule extract_lines:
     log:
         f"{run_dir}/logs/extract_lines/{{field}}_{{id}}.log",
     params:
+        conda_env_flag=conda_env_flag,
         exist_skip=cfg_el.get("exist_skip", False),
         center_crop=cfg_el.get("window_size", 50),
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --full_fits_path {input.full_fits} \
             --table_row_path {input.row_fits} \
             --kernel_fits_path {input.kerenel_fits} \
@@ -246,13 +253,14 @@ rule gen_radial_profiles:
     output:
         profile_fits = f"{radial_profiles_dir}/{{field}}_{{id}}_profile.fits",
     params:
+        conda_env_flag=conda_env_flag,
         annuli_width = cfg_rp.get("annuli_width", 1),
     log:
         f"{run_dir}/logs/radial_profiles/{{field}}_{{id}}.log",
     shell:
         """
         mkdir -p $(dirname {log})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --extracted_fits_path {input.extracted_fits} \
             --row_fits_path {input.row_fits} \
             --profile_fits_path {output.profile_fits} \
@@ -270,10 +278,12 @@ rule diagnostic_plots:
         plot_png=f"{plt_dir}/diagnostic_plot_all/{{field}}_{{id}}.png",
     log:
         f"{run_dir}/logs/diagnostic_plots/{{field}}_{{id}}.log",
+    params:
+        conda_env_flag=conda_env_flag,
     shell:
         """
         mkdir -p $(dirname {log}) $(dirname {output.plot_png})
-        conda run -n {env_name} python {input.script} \
+        conda run {params.conda_env_flag} python {input.script} \
             --extracted_fits_path {input.extracted_fits} \
             --profile_fits_path {input.profile_fits} \
             --save_plot_path {output.plot_png} \
