@@ -85,7 +85,7 @@ def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_
         
         #calculate the balmer decrement
         balmer_r     = ha/hb
-        balmer_r_err =  balmer_r * np.sqrt((ha_err / ha) ** 2 + (hb_err / hb) ** 2)
+        balmer_r_err = np.sqrt(ha_err**2 + (ha * hb_err / hb)**2) / np.abs(hb)
         
         #now calculate the extinction
         #color excess
@@ -108,8 +108,8 @@ def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_
         table['hb'] = [hb]
         table['hb_err'] = [hb_err]
         table['hb_limit'] = [hb_limit]
-        table['balmer_r'] = [balmer_r]
-        table['balmer_r_err'] = [balmer_r_err]
+        table['balmer'] = [balmer_r]
+        table['balmer_err'] = [balmer_r_err]
         table['E_bv'] = [E_bv]
         table['A_ha'] = [A_ha]
         table['has_profile'] = [has_profile]

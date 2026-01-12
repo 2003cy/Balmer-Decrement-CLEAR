@@ -30,17 +30,17 @@ def list_downloaded_objs(wildcards=None):
     return glob_wildcards(pattern)
 
 #---------------the following are output file lists based on downloaded objects----------------------------
-def psf_ha_objs(wildcards=None):
+def psf_ha(wildcards=None):
     wc = list_downloaded_objs(wildcards)
     return expand(f"{psf_dir}/{{field}}_{{id}}_psf_ha.fits",
         zip,field=wc.field, id=wc.id,)
 
-def psf_hb_objs(wildcards=None):
+def psf_hb(wildcards=None):
     wc = list_downloaded_objs(wildcards)
     return expand(f"{psf_dir}/{{field}}_{{id}}_psf_hb.fits",
         zip,field=wc.field, id=wc.id,)
 
-def psf_kernel_objs(wildcards=None):
+def psf_kernel(wildcards=None):
     wc = list_downloaded_objs(wildcards)
     return expand(f"{psf_dir}/{{field}}_{{id}}_psf_kernel.fits",
         zip,field=wc.field, id=wc.id,)
@@ -55,17 +55,23 @@ def radial_profiles(wildcards=None):
     return expand(f"{radial_profiles_dir}/{{field}}_{{id}}_profile.fits",
         zip,field=wc.field, id=wc.id,)
 
+def diagnostic_plots(wildcards=None):
+    wc = list_downloaded_objs(wildcards)
+    return expand(f"{plt_dir}/diagnostic_plot_all/{{field}}_{{id}}.png",
+        zip,field=wc.field, id=wc.id,)
+
 # top-level rule
 rule all:
     input:
         f"{run_dir}/{path_lis['master_catalog_raw']}",
         f"{run_dir}/{path_lis['master_catalog_clean']}",
         f"{data_products_dir}/.download_completed",
-        psf_ha_objs,
-        psf_hb_objs,
-        psf_kernel_objs,
+        psf_ha,
+        psf_hb,
+        psf_kernel,
         extracted_objs,  
         radial_profiles,
+        diagnostic_plots,
         
 #generate master catalog
 cfg = config["gen_master_catalog"]
@@ -256,5 +262,25 @@ rule gen_radial_profiles:
             --row_fits_path {input.row_fits} \
             --profile_fits_path {output.profile_fits} \
             --annuli_width {params.annuli_width} \
+            2>&1 | tee {log}
+        """
+
+#diagnostic plots for individual objects
+rule diagnostic_plots:
+    input:
+        script="6_diag_plot.py",
+        extracted_fits=f"{data_extracted_dir}/{{field}}_{{id}}_extracted.fits",
+        profile_fits=f"{radial_profiles_dir}/{{field}}_{{id}}_profile.fits",
+    output:
+        plot_png=f"{plt_dir}/diagnostic_plot_all/{{field}}_{{id}}.png",
+    log:
+        f"{run_dir}/logs/diagnostic_plots/{{field}}_{{id}}.log",
+    shell:
+        """
+        mkdir -p $(dirname {log}) $(dirname {output.plot_png})
+        conda run -n {env_name} python {input.script} \
+            --extracted_fits_path {input.extracted_fits} \
+            --profile_fits_path {input.profile_fits} \
+            --save_plot_path {output.plot_png} \
             2>&1 | tee {log}
         """
