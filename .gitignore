@@ -8,3 +8,4 @@ output/
 **.fits
 .DS_Store
 .vscode/
+logs/
