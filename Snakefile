@@ -1,8 +1,3 @@
-#configfile: "snakemake/config_local.yaml"
-'''
-snakemake -s ./Snakefile_preprocess --cores 7 --configfile snakemake/config.yaml --keep-going
-'''
-
 num_threads = config["num_threads"]
 env_name = config["env"]
 home_dir = config["home_dir"]
