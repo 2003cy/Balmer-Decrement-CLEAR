@@ -1,4 +1,3 @@
-
 num_threads = config["num_threads"]
 conda_env_flag = config["env_flag"]
 home_dir = config["home_dir"]

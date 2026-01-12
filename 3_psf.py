@@ -128,32 +128,35 @@ def gen_drizzled_psf_for_wavelength(
             )
 
             # open tmp psf, update wcs info, and append to hdulist
-            with fits.open(tmp_psf) as hdu_psf:
-                img_hdu = fits.ImageHDU(data=hdu_psf[0].data, header=hdu_psf[0].header)
-                print(f"  PSF shape: {img_hdu.data.shape}")
+            #certain psf tmp file may be corrupted 
+            try:
+                with fits.open(tmp_psf) as hdu_psf:
+                    img_hdu = fits.ImageHDU(data=hdu_psf[0].data, header=hdu_psf[0].header)
+                    print(f"  PSF shape: {img_hdu.data.shape}")
 
-                # PSF image FOV in arcsec = PIXSCALE * NAXIS1
-                size_arcsec = img_hdu.header["PIXSCALE"] * img_hdu.header["NAXIS1"]
-                modified_header, wcs_obj = make_wcsheader(
-                    ra=table_row["ra"],
-                    dec=table_row["dec"],
-                    size=size_arcsec,
-                    pixscale=img_hdu.header["PIXSCALE"],
-                    theta=image.header["PA_APER"],
-                )
+                    # PSF image FOV in arcsec = PIXSCALE * NAXIS1
+                    size_arcsec = img_hdu.header["PIXSCALE"] * img_hdu.header["NAXIS1"]
+                    modified_header, wcs_obj = make_wcsheader(
+                        ra=table_row["ra"],
+                        dec=table_row["dec"],
+                        size=size_arcsec,
+                        pixscale=img_hdu.header["PIXSCALE"],
+                        theta=image.header["PA_APER"],
+                    )
+                    wcs_list.append(WCS(modified_header))
+                    img_hdu.header.update(modified_header)
+                    img_hdu.name = rootname
+                    psf_list.append(img_hdu)
 
-                wcs_list.append(WCS(modified_header))
-                img_hdu.header.update(modified_header)
-                img_hdu.name = rootname
+                os.remove(tmp_psf)
 
-                psf_list.append(img_hdu)
-
-            os.remove(tmp_psf)
-
-            # integration time for weighting during drizzle
-            int_times.append(image.header["DELTATIM"])
-            print(f"  PSF generated for {identifier}")
-
+                # integration time for weighting during drizzle
+                int_times.append(image.header["DELTATIM"])
+                print(f"  PSF generated for {identifier}")
+            except Exception as e:
+                print(f"  Skipping PSF generation for {identifier} due to error: {e}")
+                continue
+            
     if len(psf_list) <= 1:
         print("No PSFs generated (no matching filters / exposures). Nothing to drizzle.")
         return
