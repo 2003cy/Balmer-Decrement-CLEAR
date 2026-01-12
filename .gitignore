@@ -3,6 +3,7 @@ test_snakemake/
 .ipynb_checkpoints
 **/__pycache__/
 *.pyc
+**._**
 output/
 **.fits
 .DS_Store
