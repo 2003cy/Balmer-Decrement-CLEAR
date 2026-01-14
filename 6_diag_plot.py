@@ -14,14 +14,14 @@ matplotlib.use('Agg')
 def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
     with fits.open(profile_fits_path) as hdul:
         obj = Table(hdul[1].data)[0]
-        r=obj['distance']/0.1 * obj['pixel_length']
+        r=obj['distance']/0.1 * obj['pixel_length'] #in kpc
         ha=obj['ha']; ha_err=obj['ha_err']; ha_lim=obj['ha_limit']
         hb=obj['hb']; hb_err=obj['hb_err']; hb_lim=obj['hb_limit']
         balmer = obj['balmer']; balmer_err = obj['balmer_err']
         
     with fits.open(extracted_fits_path) as hdul:
         
-        re = obj['re']/0.1; q = obj['q']; pa = obj['pa']
+        re = obj['re']/0.1; q = obj['q']; pa = obj['pa'] #re in pixels
         
         #prepare segmentation map
         seg = hdul[2].data == obj['ID']
@@ -60,7 +60,7 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
 
 
             # plot the ellipse at the effective radius for all images, use photutils aperture
-            center = (data.shape[1]/2-0.5, data.shape[0]/2-0.5)
+            center = ( (data.shape[1]-2)/2, (data.shape[0]-2)/2)
             aperture = EllipticalAperture(center, a=re, b=re * q, theta=np.deg2rad(pa*u.deg - 90*u.deg))
             aperture.plot(ax=ax, color='gray', lw=2, alpha=0.8, label='Effective Radius')
             ax.scatter(center[1], center[0], color='white', s=100, marker='x', label='Center')

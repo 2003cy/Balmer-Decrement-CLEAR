@@ -12,7 +12,7 @@ def ellip_aperture_series(obj, image, annuli_width=1):
     # The position angle
     pa = obj['pa']
     # The center of the object
-    center = (image.data.shape[0]/2 - 0.5, image.data.shape[1]/2 - 0.5)
+    center = (image.data.shape[0]-2)/2, (image.data.shape[1]-2)/2
     
     # We now generate a series of equi width elliptical annuli
     if 3*re <5:

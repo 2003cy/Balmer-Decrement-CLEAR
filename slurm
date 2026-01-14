@@ -10,7 +10,7 @@
 #SBATCH --ntasks-per-node=1          # one task on the node
 #SBATCH --cpus-per-task=72           # use all 72 cores on the node
 #SBATCH --mem=200000                 # 200 GB RAM
-#SBATCH --time=01:00:00              # walltime: 1 hours
+#SBATCH --time=00:30:00              # walltime: 1 hours
 
 module purge
 
@@ -38,3 +38,6 @@ snakemake \
   -q \
   --cores 72 \
   --keep-going
+
+#collect results from Snakemake
+conda run -n stenv python 7_collect_results.py

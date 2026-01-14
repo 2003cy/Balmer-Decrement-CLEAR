@@ -29,8 +29,9 @@ def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
     padding_mask = image.data ==0
     pack_mask = double_packman(image.data.shape[0],45,45)
     bad_pixel = weight.data <=0
+    bad_values = np.isnan(image.data) | np.isinf(image.data)
 
-    mask = np.logical_or.reduce((seg_mask, padding_mask, bad_pixel, pack_mask))
+    mask = np.logical_or.reduce((seg_mask, padding_mask, bad_pixel, pack_mask, bad_values))
     error_array = np.where(mask,0, weight.data**-0.5) #will have infinite warning, inf in masked region
     # Initialize arrays to store the results
     sb_lis = np.array([])
@@ -42,12 +43,11 @@ def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
     for i, annulus in enumerate(apertures):
         phot_table  = aperture_photometry(
             image.data, annulus, error=error_array, 
-            mask=mask, method='subpixel', subpixels=4)
+            mask=mask, method='subpixel', subpixels=6)
         
         area = annulus.area_overlap(
             image.data,
-            mask=mask,method='subpixel',subpixels=4)
-
+            mask=mask,method='subpixel',subpixels=6)
         sb_limit = surface_brightness_limit(image, seg, area)
         
         sb_lis = np.append(sb_lis, phot_table['aperture_sum'][0] / float(area))
@@ -58,7 +58,7 @@ def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
         print(f"Annulus {i}: area = {area}, SB = {sb_lis[i]}, SB_err = {sb_err_lis[i]}, SB_limit = {sb_limit}")
         
     print(f"radius: {r}\nsb:     {sb_lis}\nsb_err: {sb_err_lis}\nlimit:  {sb_limit_lis}\n\n")
-    return r*image.header['PIXASEC'], sb_lis, sb_err_lis, sb_limit_lis
+    return r*image.header['PIXASEC'], sb_lis, sb_err_lis, sb_limit_lis #distace in arcsec
 
 #radial table for a given object
 def compute_bd_profile(row_fits_path,extracted_fits_path, profile_fits_path,seg_path=None,  annuli_widths=1):
