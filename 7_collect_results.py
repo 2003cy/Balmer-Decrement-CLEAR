@@ -30,7 +30,7 @@ def collect_results():
             has_profile_lis.append(has_profile)
 
     master_table['has_profile'] = has_profile_lis
-    print(len(master_table[master_table['has_profile'] == 1]))
+    print('initial selection based on radial 2 sigma sb limit',len(master_table[master_table['has_profile'] == 1]))
     master_table.write('master_table.fits', overwrite=True)
     return master_table
 
