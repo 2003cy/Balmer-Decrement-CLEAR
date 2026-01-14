@@ -1,5 +1,6 @@
 from astropy.io import fits
 from astropy.table import Table
+from tqdm.auto import tqdm
 import numpy as np
 import os
 
@@ -15,7 +16,7 @@ def collect_results():
     master_table = Table(rows=rows)
 
     has_profile_lis = []
-    for obj in master_table:
+    for obj in tqdm(master_table):
             r = obj['distance'] #arcsec
             ha = obj['ha']; ha_limit=obj['ha_limit']
             hb = obj['hb']; hb_limit=obj['hb_limit']
@@ -42,7 +43,7 @@ def copy_diagnostic_plots(master_table):
         os.system(f"rm -r {trget_dir}")
     os.makedirs(trget_dir, exist_ok=True)
 
-    for obj in master_table[master_table['has_profile'] == 1]:
+    for obj in tqdm(master_table[master_table['has_profile'] == 1]):
             #copy diagnostic plots to a separate folder for easier manual inspection
             src_plot = f"{src_dir}/{obj['subfield'].lower()}_{str(obj['ID']).zfill(5)}.png"
             trget_plot = f"{trget_dir}/{obj['subfield'].lower()}_{str(obj['ID']).zfill(5)}.png"

@@ -133,6 +133,7 @@ def cli():
     args = parser.parse_args()
     
     plot_for_obj(args.extracted_fits_path, args.profile_fits_path, args.save_plot_path)
+    print(f"Diagnostic plot saved to {args.save_plot_path}")
     
 if __name__ == "__main__":
     cli()
