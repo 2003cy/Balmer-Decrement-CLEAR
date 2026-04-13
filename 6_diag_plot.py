@@ -18,6 +18,8 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
         ha=obj['ha']; ha_err=obj['ha_err']; ha_lim=obj['ha_limit']
         hb=obj['hb']; hb_err=obj['hb_err']; hb_lim=obj['hb_limit']
         balmer = obj['balmer']; balmer_err = obj['balmer_err']
+        xlim = max(10,2*obj['re']/0.1 * obj['pixel_length']) #in kpc
+        mask_detected = (ha>np.sqrt(ha_err**2 + ha_lim**2)) & (hb>np.sqrt(hb_err**2 + hb_lim**2))
         
     with fits.open(extracted_fits_path) as hdul:
         
@@ -29,9 +31,9 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
         
         plt.figure(figsize=(15,10))        
         for plot_index, hdul_index, name in [
-                (1, 3, f"{hdul[3].header['FILTER']}"),
-                (2, 4, 'Hα'),
-                (3, 6, 'Hβ')]:
+                (1, 4, 'Hα'),
+                (2, 6, 'Hβ'),
+                (3, 3, f"{hdul[3].header['FILTER']}")]:
             ax = plt.subplot(2, 3, plot_index)
             ax.tick_params(axis='both', labelbottom=False, direction='in', which='both', 
             top=True, right=True, left=True, bottom=True, labelsize=13)
@@ -78,10 +80,12 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
         ax.axvspan(0, re*obj['pixel_length'], color='grey', alpha=0.3, label='Effective Radius')
         ax.errorbar(r, ha, yerr=ha_err, label='Ha', fmt='o:', color=color2, markersize=2,
             capsize=4, capthick=1.5, elinewidth=1.5)
-        #plot halimit as horizontal line
+        #plot ha limit as horizontal line
         ax.plot(r, ha_lim, color='darkred', linestyle='-.', label='Ha Limit (alt)')
-
-        ax.set_xlim(-0.2, 10)
+        #plot detected ha
+        ax.scatter(r[mask_detected], ha[mask_detected], facecolors='none', edgecolors='black', s=50, label='Detected Ha')
+        
+        ax.set_xlim(-0.2, xlim)
         ax.set_xlabel('Distance (kpc)')
         ax.set_title('$H\\alpha$ Surface Brightness')
         ax.set_yscale('log')
@@ -97,8 +101,9 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
             capsize=4, capthick=1.5, elinewidth=1.5)
         #plot hblimit as horizontal line
         ax.plot(r, hb_lim, color='darkgreen', linestyle='-.', label='Hb Limit (alt)')
-                                        
-        ax.set_xlim(-0.2, 10)
+        #plot detected hb
+        ax.scatter(r[mask_detected], hb[mask_detected], facecolors='none', edgecolors='black', s=50, label='Detected Hb')
+        ax.set_xlim(-0.2, xlim)
         ax.set_xlabel('Distance (kpc)')
         ax.set_title('$H\\beta$ Surface Brightness')
         ax.set_yscale('log')
@@ -114,9 +119,15 @@ def plot_for_obj(extracted_fits_path, profile_fits_path, save_plot_path):
             fmt='o:', color=color3, markersize=4,
             capsize=4, capthick=1.5, elinewidth=1.5
         )
+        #plot used points
+        ax.errorbar(
+            r[mask_detected], balmer[mask_detected], yerr=balmer_err[mask_detected],
+            fmt='o', color='black', markersize=6,
+            label='Used Points'
+        )
         ax.axhline(y=2.86, color='green', linestyle='--', label='theory')
         ax.fill_between(r, 2.86*0.8, 2.86*1.2, color='green', alpha=0.2)
-        ax.set_xlim(-0.2, 8)
+        ax.set_xlim(-0.2, xlim)
         ax.set_ylim(0, np.nanmin([np.nanmax(balmer)+3,25]))
         ax.set_xlabel('Distance [kpc]')
         ax.set_title('Balmer Decrement Ha/Hb')

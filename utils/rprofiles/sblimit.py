@@ -14,15 +14,15 @@ def surface_brightness_limit(image, seg, area):
     pix_scale = image.header['PIXASEC']  # arcsec/pixel
     pix_area_scale = pix_scale ** 2
     
-    zeropoint = 1 #here it can be set to arbitrary, limit will be converted back to flux.
+    zeropoint = 1 #here it can be set to arbitrary, limit will be converted from mag back to flux anyway.
     # Calculate the surface brightness limit using sbcontrast
     limit = sbc.sblimit(image = image.data,
                 zeropoint= zeropoint,
                 pix_scale = pix_scale,
                 mask = seg,
-                sigma = 2,
+                sigma = 1,
                 scale_arcsec = pix_scale * np.max([1,int(area**0.5)]), #set min area to 1 pix^2
                 verbose=False
                 )[1][0]
-    # Convert to flux limit (unit: 1e-17 erg/s/cm²/pix2)
+    # Convert to flux limit (unit: 1e-17 erg/s/cm²/pix2), already given in sblimit output
     return limit

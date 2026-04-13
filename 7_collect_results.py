@@ -18,12 +18,15 @@ def collect_results():
     has_profile_lis = []
     for obj in tqdm(master_table):
             r = obj['distance'] #arcsec
-            ha = obj['ha']; ha_limit=obj['ha_limit']
-            hb = obj['hb']; hb_limit=obj['hb_limit']
+            ha = obj['ha']; ha_err = obj['ha_err']; ha_limit=obj['ha_limit']
+            hb = obj['hb']; hb_err = obj['hb_err']; hb_limit=obj['hb_limit']
+            
+            err_ha = np.sqrt(ha_err**2 + ha_limit**2)
+            err_hb = np.sqrt(hb_err**2 + hb_limit**2)
             #first manual selection based on sn_limit
-            mask_r = (r < 1*obj['re']) #within 1 re
-            mask_sb_limit = (ha > ha_limit) & (hb > hb_limit)
-            if len(r[mask_r & mask_sb_limit]) >= 2:
+            mask_r = (r < 2*obj['re']) #within 2 re
+            mask_sb = (ha>err_ha) & (hb>err_hb)
+            if len(r[mask_r & mask_sb]) >= 2:
                     has_profile = 1
             else:
                     has_profile = 0

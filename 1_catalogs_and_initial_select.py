@@ -83,6 +83,9 @@ def clean_catalogs(master_catalog_path='catalogs/master_cat_raw.fits',
     print('fraction of bad hb:', len(cat_lis[~hb_real]) / len(cat_lis))
     print('fraction of bad radius:', len(cat_lis[~radius_real]) / len(cat_lis))
     print('fraction of bad morphology:', len(cat_lis[~good_morph]) / len(cat_lis))
+    
+    print('1. selection: everything but ha hb:', len(cat_lis[z_real & mass_real & re_real & radius_real & good_morph]) / len(cat_lis))
+    print('2. selection: everything:', len(cat_lis[z_real & mass_real & re_real & radius_real & good_morph & ha_real & hb_real ]) / len(cat_lis))
     cat_lis = cat_lis[z_real & mass_real & re_real & ha_real & hb_real & radius_real & good_morph]
     
     #calculate sn ratio

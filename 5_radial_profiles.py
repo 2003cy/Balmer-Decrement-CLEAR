@@ -12,6 +12,7 @@ from    utils.atten_curve        import Calzetti
 import  os
 import  argparse
 
+
 def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
     '''
     source function to perform elliptical annuli measurement -> radial profile
@@ -58,6 +59,8 @@ def gen_radial_profile(obj, image, weight, seg, annuli_width=1):
         print(f"Annulus {i}: area = {area}, SB = {sb_lis[i]}, SB_err = {sb_err_lis[i]}, SB_limit = {sb_limit}")
         
     print(f"radius: {r}\nsb:     {sb_lis}\nsb_err: {sb_err_lis}\nlimit:  {sb_limit_lis}\n\n")
+    #if limit has 0. bad values, set limit to np.nan
+    #sb_limit_lis[sb_limit_lis < 1e-10] = np.nan
     return r*image.header['PIXASEC'], sb_lis, sb_err_lis, sb_limit_lis #distace in arcsec
 
 #radial table for a given object

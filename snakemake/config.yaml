@@ -1,5 +1,5 @@
 # Configuration file for Snakemake workflow in local machine
-#snakemake --configfile snakemake/config_local.yaml --keep-going --cores 12
+#snakemake --configfile snakemake/config.yaml --keep-going --cores 12
 output_dir: "output"
 
 #env_fag: "-n stenv"
@@ -26,8 +26,8 @@ gen_master_catalog:
 
 download_data:
     data_products:
-     - "full" 
-     - "beams"
+    - "full" 
+    - "beams"
 
 psf_ha:
     wavelength: 656.461  # in nm
