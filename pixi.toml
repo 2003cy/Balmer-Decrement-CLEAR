@@ -1,0 +1,31 @@
+[workspace]
+name = "balmer-decrement-clear"
+version = "0.1.0"
+description = "Balmer Decrement radial profile analysis of the CLEAR HST grism survey"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = ">=3.11,<3.13"
+numpy = "*"
+astropy = "*"
+matplotlib = "*"
+photutils = "*"
+tqdm = "*"
+ipykernel = ">=7.2.0,<8"
+
+[pypi-dependencies]
+# snakemake: conda-forge candidate set is too constrained; pip resolves cleanly
+snakemake = "*"
+ipykernel = "*"
+drizzlepac = "*"
+
+[tasks]
+# Run the full Snakemake pipeline
+run = "snakemake --snakefile Snakefile --configfile snakemake/config.yaml --keep-going --cores 1"
+run-all = "snakemake --snakefile Snakefile --configfile snakemake/config.yaml --keep-going --cores 72"
+
+# Individual pipeline steps
+catalog = "python 1_catalogs_and_initial_select.py"
+download = "python 2_download_spectra.py"
+collect = "python 7_collect_results.py"

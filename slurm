@@ -14,17 +14,10 @@
 
 module purge
 
-# Load whatever you need for conda (adjust if different on Raven)
-# Example for user-local Miniconda:
-source ~/miniconda3/etc/profile.d/conda.sh
-source ~/.bashrc
-# Activate the environment that has snakemake installed
-conda activate /u/yacheng/conda-envs/snakemake
-
 mkdir -p logs
 
 # Run Snakemake using all cores on this node
-snakemake \
+pixi run snakemake \
   --snakefile Snakefile \
   --configfile snakemake/config.yaml \
   -q \
@@ -32,7 +25,7 @@ snakemake \
   --keep-going
 
 #run second time to make sure all dependencies are updated
-snakemake \
+pixi run snakemake \
   --snakefile Snakefile \
   --configfile snakemake/config.yaml \
   -q \
@@ -40,4 +33,4 @@ snakemake \
   --keep-going
 
 #collect results from Snakemake
-conda run -n stenv python 7_collect_results.py
+pixi run python 7_collect_results.py
