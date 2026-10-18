@@ -4,7 +4,8 @@ test_snakemake/
 **/__pycache__/
 *.pyc
 **._**
-output/
+output/*
+!output/diagnosticplot.png
 **.fits
 .DS_Store
 .vscode/
