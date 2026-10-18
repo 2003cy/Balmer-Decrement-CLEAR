@@ -2,8 +2,8 @@
 # Full-node Snakemake job on Raven
 
 #SBATCH -J pre_process         # job name
-#SBATCH -o logs/snakemake_%j.out     # stdout
-#SBATCH -e logs/snakemake_%j.err     # stderr
+#SBATCH -o output/logs/snakemake_%j.out     # stdout
+#SBATCH -e output/logs/snakemake_%j.err     # stderr
 #SBATCH -D /u/yacheng/projects/clear_bd  # working directory
 
 #SBATCH --nodes=1                    # one node
@@ -14,7 +14,7 @@
 
 module purge
 
-mkdir -p logs
+mkdir -p output/logs
 
 # Run Snakemake using all cores on this node
 pixi run snakemake \
