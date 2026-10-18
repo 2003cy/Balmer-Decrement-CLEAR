@@ -29,3 +29,4 @@ run-all = "snakemake --snakefile Snakefile --configfile snakemake/config.yaml --
 catalog = "python 1_catalogs_and_initial_select.py"
 download = "python 2_download_spectra.py"
 collect = "python 7_collect_results.py"
+register-kernel = "python -m ipykernel install --user --name balmer-decrement-clear --display-name 'Balmer Decrement (pixi)'"

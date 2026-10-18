@@ -2,10 +2,8 @@
 #snakemake --configfile snakemake/config.yaml --keep-going --cores 12
 output_dir: "output"
 
-#env_fag: "-n stenv"
-#home_dir: "/Users/yangcheng/clear_bd/Balmer-Decrement-CLEAR" 
-env_flag: "-p /u/yacheng/conda-envs/stenv"
-home_dir: "/u/yacheng/projects/clear_bd"
+#home_dir: "/Users/yangcheng/clear_bd"
+home_dir: "/u/yacheng/clear_bd"
 
 #this is num_threads for 1 job force to be 1
 num_threads: 1
