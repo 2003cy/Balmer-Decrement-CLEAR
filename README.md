@@ -10,7 +10,7 @@ diagnostics) is orchestrated with [Snakemake](https://snakemake.readthedocs.io/)
 final science plots are produced in [`analysis.ipynb`](analysis.ipynb).
 
 <p align="center">
-<img src="diagnosticplot.png" alt="Per-galaxy diagnostic plot" width="1000">
+<img src="output/diagnosticplot.png" alt="Per-galaxy diagnostic plot" width="1000">
 </p>
 
 *Example per-galaxy diagnostic: (top) PSF-matched Hα, Hβ and F105W maps; (bottom)
@@ -67,7 +67,7 @@ the download checkpoint, then collects results).
 | 4 | `4_line_map_extraction.py` | Extract Hα & Hβ line maps, NII-correct (Zahid+14), PSF-match Hβ | `data_extracted/` |
 | 5 | `5_radial_profiles.py` | Elliptical-annulus photometry → radial SB & Balmer-decrement profiles | `data_radial_profiles/` |
 | 6 | `6_diag_plot.py` | Per-galaxy diagnostic plot (the figure above) | `plots/diagnostic_plot_all/` |
-| 7 | `7_collect_results.py` | Stack all per-object profiles into one master table | `master_table.fits` |
+| 7 | `7_collect_results.py` | Stack all per-object profiles into one master table | `output/master_table.fits` |
 
 ### Final analysis
 
@@ -93,7 +93,6 @@ Snakefile            workflow DAG
 snakemake/config.yaml  paths, threads, per-step parameters
 pixi.toml / pixi.lock  reproducible environment + task shortcuts
 analysis.ipynb       sample-level science plots
-diagnosticplot.png   example per-galaxy diagnostic
 utils/               shared analysis code
 output/              generated catalogs, data products, profiles, plots
 ```
@@ -102,7 +101,7 @@ output/              generated catalogs, data products, profiles, plots
 
 ## Diagnostic & suggested plots
 
-`diagnosticplot.png` in the repo root is the reference per-galaxy diagnostic
+`output/diagnosticplot.png` is the reference per-galaxy diagnostic
 (re-generated for every object in `output/plots/diagnostic_plot_all/`). It is the
 first thing to check when validating a run — it shows whether the Hα/Hβ maps, PSF
 matching, and profile extraction all behaved for a given galaxy.
